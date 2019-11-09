@@ -11,6 +11,16 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import qrcode
 
+def get_host_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    return ip
+
 
 class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
     daemon_threads = True
@@ -79,7 +89,7 @@ def main():
     handler_class.protocol_version = "HTTP/1.0"
     handler_class = partial(handler_class,
                             directory=args.directory)
-    host = socket.gethostbyname(socket.gethostname())
+    host = get_host_ip()
     if args.qr:
         qr = qrcode.QRCode()
         qr.add_data("http://{}:{}".format(host, args.port))
